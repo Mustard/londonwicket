@@ -1,0 +1,36 @@
+.listEditorContainer a.deleteLink {
+  text-decoration: none;
+  float: right;
+}
+
+ a.deleteLink img {
+  border: 0;
+}
+
+.listEditorContainer .item {
+  background-color: #eee;
+  border: 1px solid #ccc;
+  padding: 0.15em;
+  clear: both;
+  margin: 0.15em;
+}
+
+.listEditorContainer .item:after {
+  content: "."; 
+  display: block; 
+  height: 0; 
+  clear: both; 
+  visibility: hidden;
+}
+
+.listEditorContainer .itemComponent {
+  float: left;
+}
+
+.listEditorContainer .handle {
+  background-color: #aaa;
+  float: left;
+  width: 1em;
+  margin-right: 0.2em;
+  cursor: move;
+}
