@@ -1,0 +1,27 @@
+<html xmlns:wicket="http://wicket.apache.org">
+<body>
+<wicket:extend>
+
+	<wicket:enclosure child="form">
+		<h1>Define thumbnails</h1>
+
+		<form wicket:id="form">
+			<table>
+				<tr class="adminImage" wicket:id="container">
+					<td>
+						<h3 wicket:id="title"></h3>
+						<div><img wicket:id="image"/></div>
+					</td>
+					<td><div wicket:id="preview"></div></td>
+				</tr>
+				<tr>
+					<td colspan="2" class="padMe">
+						<input type="submit" value="Create thumbnails" />
+					</td>
+				</tr>
+			</table>
+		</form>
+	</wicket:enclosure>
+</wicket:extend>
+</body>
+</html>
