@@ -4,7 +4,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -26,10 +25,17 @@ import javax.imageio.stream.FileImageOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jhlabs.image.GaussianFilter;
 import com.jhlabs.image.UnsharpFilter;
 
 public class GalleryService {
+
+  private static final float JPEG_QUALITY_FOR_RESAMPLE = 0.85f;
+  private static final float JPEG_QUALITY_FOR_THUMBNAIL = 0.85f;
+  
+  private static final float UNSHARP_AMOUNT_FOR_RESAMPLE = 0.2f;
+  private static final float UNSHARP_AMOUNT_FOR_THUMBNAIL = 0.1f;
+  private static final float UNSHARP_RADIUS_FOR_THUMBNAIL = 1.7f;
+
   private static final Logger LOG = LoggerFactory.getLogger(GalleryService.class);
   
   private static final int THUMB_SIZE = 96;
@@ -231,11 +237,11 @@ public class GalleryService {
           // Run an unsharp filter.
           LOG.info("Running unsharp mask...");
           UnsharpFilter unsharp = new UnsharpFilter();
-          unsharp.setAmount(0.25f);
+          unsharp.setAmount(UNSHARP_AMOUNT_FOR_RESAMPLE);
           newImg = unsharp.filter(newImg, null);
 
           // Output.
-          writeJpeg(newImg, scaledImage, 0.85f);
+          writeJpeg(newImg, scaledImage, JPEG_QUALITY_FOR_RESAMPLE);
 
           long timing = System.currentTimeMillis() - start;
           LOG.info("Created new scaled image in {}ms: {}", timing, scaledImage);
@@ -254,13 +260,6 @@ public class GalleryService {
       File originalFile = getScaledImage(originalImage.getAlbum(), originalImage.getImage(), res);
       BufferedImage original = ImageIO.read(originalFile);
 
-      if (thumbnailCoords.width > 140) {
-        // Gaussian blur the original before making a thumbnail, so they have less artefacts and load faster.
-        // 128 is pretty arbitrary and was selected after some trial and error.
-        BufferedImageOp op = new GaussianFilter(thumbnailCoords.width / 128);
-        original = op.filter(original, null);
-      }
-      
       BufferedImage intermediate = new BufferedImage(THUMB_SIZE * 2, THUMB_SIZE * 2, BufferedImage.TYPE_INT_RGB);
       Graphics2D gfx = intermediate.createGraphics();
       gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -279,14 +278,14 @@ public class GalleryService {
       thumbnail.flush();
       
       UnsharpFilter unsharp = new UnsharpFilter();
-      unsharp.setAmount(0.1f);
-      unsharp.setRadius(1.7f);
+      unsharp.setAmount(UNSHARP_AMOUNT_FOR_THUMBNAIL);
+      unsharp.setRadius(UNSHARP_RADIUS_FOR_THUMBNAIL);
       thumbnail = unsharp.filter(thumbnail, null);
       
       File thumbFile = getThumbnail(getImage(originalImage.getAlbum(), originalImage.getImage()));
       ensureDirExists(thumbFile.getParentFile());
       
-      writeJpeg(thumbnail, thumbFile, 0.85f);
+      writeJpeg(thumbnail, thumbFile, JPEG_QUALITY_FOR_THUMBNAIL);
       
     } catch (IOException e) {
       LOG.error("Could not create thumbnail", e);
