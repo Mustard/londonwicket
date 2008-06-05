@@ -39,8 +39,8 @@ public class EditAlbumPage extends TemplatePage {
       }
       @Override
       protected void onError(AjaxRequestTarget target) {
-        super.onError(target);
         target.addComponent(getFeedbackPanel());
+        super.onError(target);
       }
       @Override
       protected void onSubmit(AjaxRequestTarget target) {
@@ -55,7 +55,7 @@ public class EditAlbumPage extends TemplatePage {
           throw new RestartResponseException(EditAlbumPage.class, new PageParameters("0=" + album));
         }
       }
-    }.add(new PatternValidator("[^:/\\\\\\*\\|]+")));
+    }.add(new PatternValidator("[^,=:/\\\\\\*\\|]+")));
     
     IModel model = new AbstractReadOnlyModel() {
 
@@ -109,7 +109,7 @@ public class EditAlbumPage extends TemplatePage {
           protected void onSubmit(AjaxRequestTarget target) {
             target.addComponent(listEditor);
           }
-        });
+        }.add(new PatternValidator("[^,=:/\\\\\\*\\|]+")));
 
         return fragment;
       }

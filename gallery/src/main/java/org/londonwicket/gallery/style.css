@@ -1,7 +1,7 @@
 body {
-	font-size: 160%;
-	font-family: Helvetica;
-	color: #888
+	font-size: 125%;
+	font-family: Helvetica, Arial, Sans;
+	color: #888;
 }
 
 table {
@@ -88,34 +88,6 @@ h1 input {
 .listEditorContainer {
   overflow: hidden;
 }
-/*
-.listEditorContainer {
-  background-color: #eee;
-  overflow: hidden;
-}
-
-.listEditorContainer .item {
-  background-color: #eee;
-  border: 1px solid #ccc;
-  padding: 0.15em;
-  margin: 0.15em;
-  float: left;
-}
-
-.listEditorContainer .handle {
-  background-color: #aaa;
-  float: left;
-  width: 1em;
-  margin-right: 0.2em;
-  cursor: move;
-}
-
-.listEditorContainer span {
-  font-size: 0.8em;
-  float: left;
-  padding-top: 0.25em;
-}
-*/
 .listEditorAddNew {
   display: none;
 }

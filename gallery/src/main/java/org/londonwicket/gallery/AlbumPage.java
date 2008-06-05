@@ -1,6 +1,7 @@
 package org.londonwicket.gallery;
 
 import java.io.File;
+import java.util.Collections;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ResourceReference;
@@ -11,6 +12,7 @@ import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.util.string.Strings;
 import org.apache.wicket.util.value.ValueMap;
 import org.londonwicket.js.JavaScriptBase;
 
@@ -21,7 +23,7 @@ public class AlbumPage extends TemplatePage {
   public AlbumPage(PageParameters params) {
     
     add(HeaderContributor.forJavaScript(JavaScriptBase.class, "prototype.js"));
-    add(HeaderContributor.forJavaScript(JavaScriptBase.class, "scriptaculous.js?load=effects"));
+    add(HeaderContributor.forJavaScript(JavaScriptBase.class, "scriptaculous.js"));
     add(HeaderContributor.forJavaScript(AlbumPage.class, "lightwindow.js"));
     add(HeaderContributor.forCss(AlbumPage.class, "lightwindow.css"));
     
@@ -57,7 +59,7 @@ public class AlbumPage extends TemplatePage {
       link.add(new Image("thumbnail", new ResourceReference("thumbnail"), map));
     }
     
-    add(new BookmarkablePageLink("upload", UploadPage.class, new PageParameters("album=" + album)));
-    add(new BookmarkablePageLink("edit", EditAlbumPage.class, new PageParameters("0=" + album)));
+    add(new BookmarkablePageLink("upload", UploadPage.class, new PageParameters(Collections.singletonMap("album", album))));
+    add(new BookmarkablePageLink("edit", EditAlbumPage.class, new PageParameters(Collections.singletonMap("0", album))));
   }
 }
