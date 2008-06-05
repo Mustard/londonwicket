@@ -22,6 +22,7 @@ import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
 
+import org.apache.wicket.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,21 +32,22 @@ public class GalleryService {
 
   private static final float JPEG_QUALITY_FOR_RESAMPLE = 0.85f;
   private static final float JPEG_QUALITY_FOR_THUMBNAIL = 0.85f;
-  
+
   private static final float UNSHARP_AMOUNT_FOR_RESAMPLE = 0.2f;
   private static final float UNSHARP_AMOUNT_FOR_THUMBNAIL = 0.1f;
   private static final float UNSHARP_RADIUS_FOR_THUMBNAIL = 1.7f;
 
-  private static final Logger LOG = LoggerFactory.getLogger(GalleryService.class);
-  
+  private static final Logger LOG = LoggerFactory
+      .getLogger(GalleryService.class);
+
   private static final int THUMB_SIZE = 96;
-  
+
   private File base, albums, scaleds, thumbs;
 
   public static enum RenameStatus {
     OK, DESTINATION_EXISTS, FAILURE
   }
-  
+
   private static final FileFilter DIRECTORIES_ONLY = new FileFilter() {
 
     public boolean accept(File file) {
@@ -61,7 +63,7 @@ public class GalleryService {
     }
 
   };
-  
+
   public GalleryService(String baseDir) {
     base = new File(baseDir);
     ensureDirExists(base);
@@ -88,7 +90,7 @@ public class GalleryService {
     checkPath(album);
     return new File(albums, album);
   }
-  
+
   public RenameStatus renameAlbum(String existingName, String newName) {
     if (getAlbum(newName).exists()) {
       return RenameStatus.DESTINATION_EXISTS;
@@ -96,18 +98,18 @@ public class GalleryService {
     if (!getAlbum(existingName).renameTo(getAlbum(newName))) {
       return RenameStatus.FAILURE;
     }
-    // Assume that if we can rename the original album, we can rename the thumbs and scaleds.
+    // Assume that if we can rename the original album, we can rename the thumbs
+    // and scaleds.
     new File(thumbs, existingName).renameTo(new File(thumbs, newName));
     new File(scaleds, existingName).renameTo(new File(scaleds, newName));
-    
 
     return RenameStatus.OK;
   }
-  
+
   public List<File> getImages(String album) {
     return new AlbumList(album);
   }
-  
+
   public List<Image> getImagesWithoutThumbnails() {
     List<Image> result = new ArrayList<Image>();
     for (File album : albums.listFiles(DIRECTORIES_ONLY)) {
@@ -119,19 +121,19 @@ public class GalleryService {
     }
     return result;
   }
-  
+
   public File getImage(String album, String image) {
     checkPath(album);
     checkPath(image);
     return new File(getAlbum(album), image);
   }
-  
+
   public void renameImage(String album, String existingImage, String newImage) {
     File existingFile = getImage(album, existingImage);
     File newFile = getImage(album, newImage);
     existingFile.renameTo(newFile);
     getThumbnail(existingFile).renameTo(getThumbnail(newFile));
-    
+
     // Preserve ordering through file renames.
     try {
       File sortFile = new File(getAlbum(album), "sorting.txt");
@@ -167,13 +169,13 @@ public class GalleryService {
       throw new RuntimeException(e);
     }
   }
-  
+
   public File getScaledImage(String album, String image, int max) {
     File file = getImage(album, image);
     ImageInfo info = new ImageInfo();
     try {
       info.setInput(new FileInputStream(file));
-  
+
       if (info.check()) {
         // If it's within the dimensions, just return it.
         if (info.getWidth() <= max && info.getHeight() <= max) {
@@ -189,7 +191,7 @@ public class GalleryService {
             return scaledImage;
           }
           long start = System.currentTimeMillis();
-          
+
           //
           // Otherwise, we need to scale the image.
           //
@@ -202,38 +204,42 @@ public class GalleryService {
           int h = originalImage.getHeight();
           double maxOriginal = Math.max(w, h);
           double scaling = max / maxOriginal;
-          
-          int newW = (int)Math.round(scaling * w);
-          int newH = (int)Math.round(scaling * h);
+
+          int newW = (int) Math.round(scaling * w);
+          int newH = (int) Math.round(scaling * h);
 
           /*
-          BufferedImageOp op = new GaussianFilter(0.5f / (float)scaling);
-          originalImage = op.filter(originalImage, null);
-          */
-          
+           * BufferedImageOp op = new GaussianFilter(0.5f / (float)scaling);
+           * originalImage = op.filter(originalImage, null);
+           */
+
           // If we need to scale down by more than 2x, scale to double the
           // eventual size and then scale again. This provides much higher
           // quality results.
           if (scaling < 0.5f) {
             LOG.info("Scaling twice for better quality...");
-            BufferedImage newImg = new BufferedImage(newW * 2, newH * 2, BufferedImage.TYPE_INT_RGB);
+            BufferedImage newImg = new BufferedImage(newW * 2, newH * 2,
+                BufferedImage.TYPE_INT_RGB);
             Graphics2D gfx = newImg.createGraphics();
-            gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             gfx.drawImage(originalImage, 0, 0, newW * 2, newH * 2, null);
             gfx.dispose();
             newImg.flush();
             originalImage = newImg;
           }
-          
+
           // Scale it.
-          BufferedImage newImg = new BufferedImage(newW, newH, BufferedImage.TYPE_INT_RGB);
+          BufferedImage newImg = new BufferedImage(newW, newH,
+              BufferedImage.TYPE_INT_RGB);
           Graphics2D gfx = newImg.createGraphics();
-          gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+          gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+              RenderingHints.VALUE_INTERPOLATION_BICUBIC);
           gfx.drawImage(originalImage, 0, 0, newW, newH, null);
           gfx.dispose();
           newImg.flush();
           originalImage.flush();
-          
+
           // Run an unsharp filter.
           LOG.info("Running unsharp mask...");
           UnsharpFilter unsharp = new UnsharpFilter();
@@ -255,45 +261,56 @@ public class GalleryService {
     return file;
   }
 
-  public void createThumbnail(Image originalImage, Rectangle thumbnailCoords, int res) {
+  public void createThumbnail(Image originalImage, Rectangle thumbnailCoords,
+      int res) {
     try {
-      File originalFile = getScaledImage(originalImage.getAlbum(), originalImage.getImage(), res);
+      File originalFile = getScaledImage(originalImage.getAlbum(),
+          originalImage.getImage(), res);
       BufferedImage original = ImageIO.read(originalFile);
 
-      BufferedImage intermediate = new BufferedImage(THUMB_SIZE * 2, THUMB_SIZE * 2, BufferedImage.TYPE_INT_RGB);
+      BufferedImage intermediate = new BufferedImage(THUMB_SIZE * 2,
+          THUMB_SIZE * 2, BufferedImage.TYPE_INT_RGB);
       Graphics2D gfx = intermediate.createGraphics();
-      gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+      gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+          RenderingHints.VALUE_INTERPOLATION_BILINEAR);
       Rectangle c = thumbnailCoords;
-      LOG.info("Thumbnail coords: {},{} - {}x{}", new Object[] {c.x, c.y, c.width, c.height});
-      BufferedImage thumbImage = original.getSubimage(c.x, c.y, c.width, c.height);
+      LOG.info("Thumbnail coords: {},{} - {}x{}", new Object[
+                                                             ] { c.x, c.y,
+          c.width, c.height });
+      BufferedImage thumbImage = original.getSubimage(c.x, c.y, c.width,
+          c.height);
       gfx.drawImage(thumbImage, 0, 0, THUMB_SIZE * 2, THUMB_SIZE * 2, null);
       gfx.dispose();
       intermediate.flush();
-      
-      BufferedImage thumbnail = new BufferedImage(THUMB_SIZE, THUMB_SIZE, BufferedImage.TYPE_INT_RGB);
+
+      BufferedImage thumbnail = new BufferedImage(THUMB_SIZE, THUMB_SIZE,
+          BufferedImage.TYPE_INT_RGB);
       gfx = thumbnail.createGraphics();
-      gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+      gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+          RenderingHints.VALUE_INTERPOLATION_BILINEAR);
       gfx.drawImage(intermediate, 0, 0, THUMB_SIZE, THUMB_SIZE, null);
       gfx.dispose();
       thumbnail.flush();
-      
+
       UnsharpFilter unsharp = new UnsharpFilter();
       unsharp.setAmount(UNSHARP_AMOUNT_FOR_THUMBNAIL);
       unsharp.setRadius(UNSHARP_RADIUS_FOR_THUMBNAIL);
       thumbnail = unsharp.filter(thumbnail, null);
-      
-      File thumbFile = getThumbnail(getImage(originalImage.getAlbum(), originalImage.getImage()));
+
+      File thumbFile = getThumbnail(getImage(originalImage.getAlbum(),
+          originalImage.getImage()));
       ensureDirExists(thumbFile.getParentFile());
-      
+
       writeJpeg(thumbnail, thumbFile, JPEG_QUALITY_FOR_THUMBNAIL);
-      
+
     } catch (IOException e) {
       LOG.error("Could not create thumbnail", e);
     }
-    
+
   }
-  
-  private void writeJpeg(BufferedImage image, File file, float quality) throws IOException {
+
+  private void writeJpeg(BufferedImage image, File file, float quality)
+      throws IOException {
     ImageWriter writer = ImageIO.getImageWritersByFormatName("jpeg").next();
     ImageWriteParam iwp = writer.getDefaultWriteParam();
     iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
@@ -303,7 +320,7 @@ public class GalleryService {
     writer.setOutput(output);
     writer.write(null, new IIOImage(image, null, null), iwp);
   }
-  
+
   private File ensureDirExists(File dir) {
     if (!dir.exists()) {
       if (!dir.mkdirs()) {
@@ -312,17 +329,17 @@ public class GalleryService {
     }
     return dir;
   }
-  
+
   private void checkPath(String path) {
     if (path.contains("..") || path.contains("/")) {
       throw new IllegalArgumentException(
           "Paths with .. or / in the name are not allowed.");
     }
   }
-  
+
   public static class Image implements Serializable, Comparable<Image> {
     private String album, image;
-    
+
     public Image(String album, String image) {
       this.album = album;
       this.image = image;
@@ -335,7 +352,7 @@ public class GalleryService {
     public String getImage() {
       return image;
     }
-    
+
     @Override
     public String toString() {
       return album + "/" + image;
@@ -348,22 +365,22 @@ public class GalleryService {
       }
       return image.compareTo(o.image);
     }
-    
+
   }
-  
+
   private class AlbumList extends AbstractList<File> {
 
     private final String album;
     private File[] files;
     private long lastChecked;
     private ArrayList<File> order;
-    
+
     public AlbumList(String album) {
       checkPath(album);
       this.album = album;
       updateFiles();
     }
-    
+
     private synchronized void updateFiles() {
       // Update at most 10 times a second.
       long now = System.currentTimeMillis();
@@ -397,7 +414,8 @@ public class GalleryService {
     }
 
     public void clear() {
-      throw new UnsupportedOperationException("clear() is not supported - dangerous!");
+      throw new UnsupportedOperationException(
+          "clear() is not supported - dangerous!");
     }
 
     public synchronized File get(int index) {
@@ -409,6 +427,7 @@ public class GalleryService {
       updateFiles();
       File file = files[index];
       file.delete();
+      Session.get().info("Deleted file " + file.getName());
       getThumbnail(file).delete();
       updateFiles();
       return file;
@@ -418,7 +437,8 @@ public class GalleryService {
       File result = order.set(index, element);
       files = order.toArray(new File[order.size()]);
       try {
-        PrintWriter writer = new PrintWriter(new File(getAlbum(album), "sorting.txt"));
+        PrintWriter writer = new PrintWriter(new File(getAlbum(album),
+            "sorting.txt"));
         for (File file : order) {
           writer.println(file.getName());
         }
@@ -433,6 +453,6 @@ public class GalleryService {
     public synchronized int size() {
       updateFiles();
       return getAlbum(album).listFiles(IMAGES_ONLY).length;
-    }    
+    }
   }
 }

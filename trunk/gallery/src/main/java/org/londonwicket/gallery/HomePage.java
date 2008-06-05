@@ -30,8 +30,9 @@ public class HomePage extends TemplatePage {
         link.setVisible(false);
       } else {
         String image = images.get(0).getName();
-        ValueMap map = new ValueMap(
-            String.format("album=%s,image=%s", album, image));
+        ValueMap map = new ValueMap();
+        map.add("album", album);
+        map.add("image", image);
         link.add(new Image("thumbnail", new ResourceReference("thumbnail"), map));
         link.add(new Label("title", album));
       }
