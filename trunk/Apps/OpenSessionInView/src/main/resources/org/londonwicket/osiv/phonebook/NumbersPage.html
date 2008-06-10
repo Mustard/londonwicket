@@ -1,0 +1,18 @@
+<html>
+<head><title>List all numbers</title></head>
+<body>
+<h2>Simple Phonebook application</h2>
+<a href="#" wicket:id="addNumber">Add new number</a>
+<table>
+<tr>
+	<td><b>Name</b> </td><td> <b>Number</b></td><td></td>
+</tr>
+<tr wicket:id="beanRow">
+	<td><span wicket:id="name"></span> </td><td> <span wicket:id="number"></span></td><td> <a href="#" wicket:id="updateNumber">Update Name</a> | <a href="#" wicket:id="deleteNumber">Delete Number</a></td>
+</tr>
+<tr>
+    <td nowrap="nowrap" wicket:id="navigator" colspan="3" align="right"></td>
+</tr>
+</table>
+</body>
+</html>
