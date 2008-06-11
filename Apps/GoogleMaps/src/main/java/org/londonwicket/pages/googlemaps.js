@@ -15,7 +15,7 @@ function initialize()
 		var bounds = map.getBounds();
 		
 		//construct a url to get the markers for these map bounds
-		var url = '/markers' + '?west=' + bounds.getSouthWest().lat() + '&south=' + bounds.getSouthWest().lng()
+		var url = markersUrl + '?west=' + bounds.getSouthWest().lat() + '&south=' + bounds.getSouthWest().lng()
 			+ '&north=' + bounds.getNorthEast().lng() + '&east=' + bounds.getNorthEast().lat();
 		
 		//do the ajax call
@@ -46,12 +46,9 @@ function createMarker(lat, lng, id)
 	
 	google.maps.Event.addListener(marker, "click", function(){
 	
-		//when marker is clicked do wicketAjaxGet to update the info window panel
-		wicketAjaxGet(infoAjaxUrl+'&id=' + marker['id'], function(){
-			//in the wicketAjaxGet onsuccess function open the info window
-			//do it here so that it gets executed after the panel has been updated
-			marker.openInfoWindowHtml(document.getElementById(domId).innerHTML);
-		});
+		//this function is produced in the java code
+		updateInfoWindow(marker);
+	
 	});
 	
 	return marker;
