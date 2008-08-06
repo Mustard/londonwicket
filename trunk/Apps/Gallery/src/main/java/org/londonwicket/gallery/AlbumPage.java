@@ -40,8 +40,7 @@ public class AlbumPage extends TemplatePage {
       ResourceLink link = new ResourceLink(repeater.newChildId(), ref, map);
       repeater.add(link);
       link.add(new SimpleAttributeModifier("class", "thumb lightwindow page-options"));
-      link.add(new SimpleAttributeModifier("rel", "[]"));
-      //link.add(new SimpleAttributeModifier("params", "lightwindow_loading_animation=false"));
+      link.add(new SimpleAttributeModifier("type", "image"));
       String name = image.getName();
       int lastDot = name.indexOf('.');
       if (lastDot > 0) {
