@@ -6,6 +6,14 @@
 	<name>Wicket Component Expressions</name>
 	<version>0.1.0-SNAPSHOT</version>
 
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 	<scm>
 		<connection>scm:svn:http://londonwicket.googlecode.com/svn/trunk/Apps/wicket-component-expressions</connection>
 		<developerConnection>scm:svn:https://londonwicket.googlecode.com/svn/trunk/Apps/wicket-component-expressions</developerConnection>
@@ -96,9 +104,10 @@
 
 	<distributionManagement>
 		<repository>
-			<id>googlecode</id>
+			<id>londonwicket-repo</id>
 			<name>London Wicket Google Code</name>
 			<url>svn:https://londonwicket.googlecode.com/svn/repo/</url>
+			<uniqueVersion>false</uniqueVersion>
 		</repository>
 	</distributionManagement>
 
