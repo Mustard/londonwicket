@@ -50,14 +50,12 @@ public class ComponentExpression {
 		}
 	}
 
-	public static List<Component> findAllComponents(Component parent,
-			String expression) {
+	public static List<Component> findAllComponents(Component parent, String expression) {
 		return findAllComponents(parent, expression, Component.class);
 
 	}
 
-	public static List<Component> findAllComponents(Component parent,
-			String expression, Class<? extends Component> typeRestriction) {
+	public static List<Component> findAllComponents(Component parent, String expression, Class<? extends Component> typeRestriction) {
 		if (expression == null || expression.equals("")) {
 			return Collections.emptyList();
 		}
